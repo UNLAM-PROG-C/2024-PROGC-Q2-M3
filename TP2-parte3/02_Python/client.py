@@ -4,7 +4,7 @@ import socket
 SERVER_IP = "127.0.0.1"  # Aquí puedes poner la IP del servidor
 SERVER_PORT = 12345  # Puerto donde el servidor escucha
 
-ROUNDS = 3
+ROUNDS = 5
 ROUNDS_TO_WIN = (ROUNDS // 2) + 1
 
 # Función para crear una partida
@@ -106,6 +106,7 @@ def main():
                         if wins == ROUNDS_TO_WIN:
                             print("HAS GANADO LA PARTIDA!")
                             server_socket.sendall(b"EXIT")
+                            break
                         elif loses == ROUNDS_TO_WIN:
                             print("HAS PERDIDO LA PARTIDA!")
                             server_socket.sendall(b"EXIT")
