@@ -1,11 +1,12 @@
 import socket
 
 # Configurar la IP y el puerto del servidor aquí
-SERVER_IP = "127.0.0.1"  # Aquí puedes poner la IP del servidor
-SERVER_PORT = 12345  # Puerto donde el servidor escucha
+SERVER_IP = "127.0.0.1"
+SERVER_PORT = 12345
 
 ROUNDS = 5
 ROUNDS_TO_WIN = (ROUNDS // 2) + 1
+
 
 # Función para crear una partida
 def create_game(server_socket):
@@ -19,13 +20,6 @@ def create_game(server_socket):
 
             # Esperar a que otro jugador se una
             print("Esperando a otro jugador...")
-            # response = server_socket.recv(1024).decode()
-            # if response == "READY_TO_PLAY":
-            #     # print("Ambos jugadores están listos. ¡Comienza el juego!")
-            #     return session_id
-            # else:
-            #     print("Error: No se recibió la confirmación de inicio de juego.")
-            #     return None
             return session_id, player_id
         else:
             print("Error al crear la partida.")
@@ -34,6 +28,7 @@ def create_game(server_socket):
         print(f"Error al crear la partida: {e}")
         return None
 
+
 # Función para unirse a una partida existente
 def join_game(server_socket):
     try:
@@ -41,7 +36,6 @@ def join_game(server_socket):
         server_socket.sendall(f"JOIN {session_id}".encode())
 
         response = server_socket.recv(1024).decode()
-        print(f"Respuesta del servidor: {response}")  # Imprimir respuesta para depurar
 
         if response.startswith("JOINED"):
             _, session_id, player_id = response.split()
@@ -56,6 +50,7 @@ def join_game(server_socket):
     except Exception as e:
         print(f"Error al unirse a la partida: {e}")
         return None
+
 
 # Función principal del cliente
 def main():
@@ -83,7 +78,9 @@ def main():
             print(f"Respuesta del servidor: {response}")
 
             if response == "READY_TO_PLAY":
-                print(f"Ambos jugadores están listos. ¡Comienza el juego! La partida es al mejor de {ROUNDS}.")
+                print(
+                    f"Ambos jugadores están listos. ¡Comienza el juego! La partida es al mejor de {ROUNDS}."
+                )
                 wins = 0
                 loses = 0
                 while True:
@@ -91,25 +88,23 @@ def main():
                     if choice in ["Piedra", "Papel", "Tijera"]:
                         server_socket.sendall(choice.encode())
                         response = server_socket.recv(1024).decode()
-                        
+
                         if response.startswith("TIE"):
                             print("EMPATE")
                         elif response.startswith("WIN"):
                             print("VICTORIA")
-                            # wins = wins + 1
                         elif response.startswith("LOSE"):
                             print("DERROTA")
-                            # loses = loses + 1
                         else:
                             print("Error al determinar ganador")
 
                         score = response.split()
                         wins = int(score[3][1])
                         loses = int(score[5][0])
-                        score = ' '.join(score[1:])
+                        score = " ".join(score[1:])
                         print(score)
                         print(f"{wins} a {loses}")
-                        
+
                         if wins == ROUNDS_TO_WIN:
                             print("HAS GANADO LA PARTIDA!")
                             server_socket.sendall(b"EXIT")
@@ -121,15 +116,17 @@ def main():
                         else:
                             server_socket.sendall(b"RESTART")
                 # Preguntar si el jugador quiere jugar otra vez
-                play_again = input("Presiona Enter para jugar otra vez o escribe 'n' para salir: ")
-                if play_again.lower() != 'n':
+                play_again = input(
+                    "Presiona Enter para jugar otra vez o escribe 'n' para salir: "
+                )
+                if play_again.lower() != "n":
                     main()  # Reiniciar el juego llamando a main() nuevamente
-                            
 
     except Exception as e:
         print(f"Error en el cliente: {e}")
     finally:
         server_socket.close()
+
 
 if __name__ == "__main__":
     main()

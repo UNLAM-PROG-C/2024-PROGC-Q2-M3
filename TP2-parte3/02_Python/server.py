@@ -1,9 +1,10 @@
-# from concurrent.futures import thread
 import socket
 import threading
 import uuid
 
-# Opciones disponibles en el juego
+HOST = "0.0.0.0"
+PORT = 1234
+
 OPTIONS = ["Piedra", "Papel", "Tijera"]
 EMPATE = 3
 GANA_1 = 1
@@ -68,7 +69,7 @@ class GameSession:
 
 # Clase que maneja el servidor de juego
 class GameServer:
-    def __init__(self, host="0.0.0.0", port=12345):
+    def __init__(self, host=HOST, port=PORT):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.bind((host, port))
         self.server_socket.listen(5)
@@ -149,14 +150,13 @@ class GameServer:
             else:
                 result = "LOSE"
                 loses += 1
-                
+
             score = f"Jugador {player_id} [{wins} - {loses}] Jugador {opponent_id}"
-            result = result + ' ' + score
+            result = result + " " + score
 
             # Enviar el resultado a ambos jugadores
             conn.sendall(result.encode())
             session.reset_choices()  # Reiniciar las elecciones para la próxima ronda
-            # conn.sendall(score.encode())
 
             data = conn.recv(1024).decode()
             if data == "EXIT":
