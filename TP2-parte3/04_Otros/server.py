@@ -95,9 +95,7 @@ class GameServer:
                 session.ready_join.wait()  # Esperar al segundo jugador
 
                 # Iniciar el juego
-                threading.Thread(
-                    target=self.play_game, args=(session, player_id), daemon=True
-                ).start()
+                self.play_game(session, player_id)
 
             elif command == "JOIN":
                 # Unirse a una sesión de juego existente
@@ -118,10 +116,8 @@ class GameServer:
                     for _, player in session.players.items():
                         player["conn"].sendall(b"READY_TO_PLAY")
 
-                    # Iniciar el juego (si no se ha iniciado aún)
-                    threading.Thread(
-                        target=self.play_game, args=(session, player_id), daemon=True
-                    ).start()
+                    # Iniciar el juego
+                    self.play_game(session, player_id)
                 else:
                     conn.sendall("SESSION_NOT_FOUND".encode())
 
