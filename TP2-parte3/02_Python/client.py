@@ -4,6 +4,9 @@ import socket
 SERVER_IP = "127.0.0.1"  # Aquí puedes poner la IP del servidor
 SERVER_PORT = 12345  # Puerto donde el servidor escucha
 
+ROUNDS = 5
+ROUNDS_TO_WIN = (ROUNDS // 2) + 1
+
 # Función para crear una partida
 def create_game(server_socket):
     try:
@@ -23,7 +26,7 @@ def create_game(server_socket):
             # else:
             #     print("Error: No se recibió la confirmación de inicio de juego.")
             #     return None
-            return session_id
+            return session_id, player_id
         else:
             print("Error al crear la partida.")
             return None
@@ -43,7 +46,7 @@ def join_game(server_socket):
         if response.startswith("JOINED"):
             _, session_id, player_id = response.split()
             print(f"Te has unido a la partida {session_id}. Tu ID es {player_id}")
-            return session_id
+            return session_id, player_id
         elif response == "SESSION_NOT_FOUND":
             print("El código de sesión no es válido o la sesión no existe.")
             return None
@@ -66,9 +69,9 @@ def main():
         option = input("Opción (1/2): ")
 
         if option == "1":
-            session_id = create_game(server_socket)
+            session_id, player_id = create_game(server_socket)
         elif option == "2":
-            session_id = join_game(server_socket)
+            session_id, player_id = join_game(server_socket)
         else:
             print("Opción inválida.")
             server_socket.close()
@@ -80,23 +83,48 @@ def main():
             print(f"Respuesta del servidor: {response}")
 
             if response == "READY_TO_PLAY":
-                print("Ambos jugadores están listos. ¡Comienza el juego!")
+                print(f"Ambos jugadores están listos. ¡Comienza el juego! La partida es al mejor de {ROUNDS}.")
+                wins = 0
+                loses = 0
                 while True:
                     choice = input("Elige Piedra, Papel o Tijera: ").capitalize()
                     if choice in ["Piedra", "Papel", "Tijera"]:
                         server_socket.sendall(choice.encode())
                         response = server_socket.recv(1024).decode()
-                        print(response)
-                        # Control de continuación o salida del juego
-                        continue_playing = input("¿Deseas seguir jugando? (si/no): ").lower()
-                        if continue_playing == 'si':
-                            # Enviar solicitud para reiniciar la partida si es necesario
-                            server_socket.sendall(b"RESTART")
-                            continue
+                        
+                        if response.startswith("TIE"):
+                            print("EMPATE")
+                        elif response.startswith("WIN"):
+                            print("VICTORIA")
+                            # wins = wins + 1
+                        elif response.startswith("LOSE"):
+                            print("DERROTA")
+                            # loses = loses + 1
                         else:
+                            print("Pegate un tiro")
+
+                        score = response.split()
+                        wins = int(score[3][1])
+                        loses = int(score[5][0])
+                        score = ' '.join(score[1:])
+                        print(score)
+                        print(f"{wins} a {loses}")
+                        
+                        if wins == ROUNDS_TO_WIN:
+                            print("HAS GANADO LA PARTIDA!")
                             server_socket.sendall(b"EXIT")
-                            print("Saliendo de la partida...")
                             break
+                        elif loses == ROUNDS_TO_WIN:
+                            print("HAS PERDIDO LA PARTIDA!")
+                            server_socket.sendall(b"EXIT")
+                            break
+                        else:
+                            server_socket.sendall(b"RESTART")
+                # Preguntar si el jugador quiere jugar otra vez
+                play_again = input("Presiona Enter para jugar otra vez o escribe 'n' para salir: ")
+                if play_again.lower() != 'n':
+                    main()  # Reiniciar el juego llamando a main() nuevamente
+                            
 
     except Exception as e:
         print(f"Error en el cliente: {e}")
