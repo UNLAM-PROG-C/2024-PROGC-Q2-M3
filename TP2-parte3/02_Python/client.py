@@ -92,15 +92,22 @@ def main():
                         server_socket.sendall(choice.encode())
                         response = server_socket.recv(1024).decode()
                         
-                        if response == '0':
+                        if response.startswith("TIE"):
                             print("EMPATE")
-                        elif response == f'{player_id}':
+                        elif response.startswith("WIN"):
                             print("VICTORIA")
-                            wins = wins + 1
-                        else:
+                            # wins = wins + 1
+                        elif response.startswith("LOSE"):
                             print("DERROTA")
-                            loses = loses + 1
+                            # loses = loses + 1
+                        else:
+                            print("Pegate un tiro")
 
+                        score = response.split()
+                        wins = int(score[3][1])
+                        loses = int(score[5][0])
+                        score = ' '.join(score[1:])
+                        print(score)
                         print(f"{wins} a {loses}")
                         
                         if wins == ROUNDS_TO_WIN:
@@ -113,6 +120,10 @@ def main():
                             break
                         else:
                             server_socket.sendall(b"RESTART")
+                # Preguntar si el jugador quiere jugar otra vez
+                play_again = input("Presiona Enter para jugar otra vez o escribe 'n' para salir: ")
+                if play_again.lower() != 'n':
+                    main()  # Reiniciar el juego llamando a main() nuevamente
                             
 
     except Exception as e:
