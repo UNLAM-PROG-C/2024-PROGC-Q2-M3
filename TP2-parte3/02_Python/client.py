@@ -101,7 +101,7 @@ def main():
                             print("DERROTA")
                             # loses = loses + 1
                         else:
-                            print("Pegate un tiro")
+                            print("Error al determinar ganador")
 
                         score = response.split()
                         wins = int(score[3][1])

@@ -5,7 +5,7 @@ import uuid
 
 # Opciones disponibles en el juego
 OPTIONS = ["Piedra", "Papel", "Tijera"]
-EMPATE = 0
+EMPATE = 3
 GANA_1 = 1
 GANA_2 = 2
 
@@ -143,12 +143,12 @@ class GameServer:
             result = session.get_result()
             if result == player_id:
                 result = "WIN"
-                wins = wins + 1
-            elif result == 0:
+                wins += 1
+            elif result == EMPATE:
                 result = "TIE"
             else:
                 result = "LOSE"
-                loses = loses + 1
+                loses += 1
                 
             score = f"Jugador {player_id} [{wins} - {loses}] Jugador {opponent_id}"
             result = result + ' ' + score
